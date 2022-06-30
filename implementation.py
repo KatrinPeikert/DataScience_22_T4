@@ -65,10 +65,11 @@ class Drug_database:
 database = Drug_database("drugsCom_raw/drugsComTrain_raw.tsv")
 with st.sidebar.expander(label='Set Values', expanded=True):
     option = st.selectbox("Column to Hot-Encode:", database.columns)
-    database.one_hot_encoding_col(option)
-    option_for_dgim = st.selectbox("Column to apply DGIM to:", database.one_hot_encoded_columns)
-    option_for_N = st.number_input("Size of Window N", 1, 161296 )
-
+    col = pd.Series(list(set([i for i in database.data[option]])))
+    #print(database.one_hot_encoding_col(option))
+    option_for_dgim = st.selectbox("Column to apply DGIM to:", col)
+    #option_for_N = st.number_input("Size of Window N", 1, 161296 )
+    option_for_N  = st.slider("Size of Window N", 1, 161296, 1)
     run_comparison = st.button('RUN!')
   
     
@@ -83,6 +84,7 @@ st.dataframe(database.data.head(5))
 st.write("Source: Drug Review Dataset (https://archive-beta.ics.uci.edu/ml/datasets/drug+review+dataset+drugs+com)")
 st.header("Result of calculation:")
 if run_comparison:   
+    database.one_hot_encoding_col(option)
     actual_number, estimated_number = database.calculate_number_ones(option_for_dgim, option_for_N)
     
     left_column_2, right_column_2 = st.columns(2)
@@ -99,7 +101,10 @@ if run_comparison:
         st.write( option_for_dgim)
         st.write( actual_number)
         st.write( estimated_number)
-        st.write( round(estimated_number/actual_number,3))
+        if estimated_number != 0:
+            st.write( round(estimated_number/actual_number,3))
+        else:
+            st.write(0)
 
     
      
